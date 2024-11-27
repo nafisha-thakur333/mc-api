@@ -25,19 +25,19 @@ app.post("/add-user", async (req, res) => {
     console.log("Request body received:", req.body); // Log the incoming request body
 
     // Destructure the required fields from the request body
-    const { first_name, last_name, email, contact, password} = req.body;
+    const { first_name, last_name, email, contact, user_password} = req.body;
 
     // Validate the input
-    if (!first_name || !last_name || !email || !contact || !password) {
+    if (!first_name || !last_name || !email || !contact || !user_password) {
         console.log("Validation failed: Missing fields");
-        return res.status(400).json({ message: "All fields (first_name, last_name, email, contact) are required." });
+        return res.status(400).json({ message: "All fields (first_name, last_name, email, contact, user_password) are required." });
     }
 
     try {
         // Insert data into the users table
         const result = await pool.query(
-            "INSERT INTO users (first_name, last_name, email, contact, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-            [first_name, last_name, email, contact, password]
+            "INSERT INTO users (first_name, last_name, email, contact, user_password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+            [first_name, last_name, email, contact, user_password]
         );
 
         console.log("Insert successful:", result.rows[0]);
