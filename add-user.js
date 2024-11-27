@@ -1,10 +1,14 @@
 // Import required modules
 const express = require("express");
+const cors = require("cors");
 const { Pool } = require("pg");
 require("dotenv").config();
 
 // Initialize the app
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Middleware to parse JSON requests
 app.use(express.json());
