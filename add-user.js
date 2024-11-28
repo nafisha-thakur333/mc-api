@@ -78,10 +78,6 @@ app.post("/login", async (req, res) => {
     }
 
     try {
-        // Create database connection pool
-        const pool = await sql.connect(dbConfig);
-
-        // Query to get the user details from the database
         const result = await pool.request()
             .input('Email', sql.VarChar, email)
             .query('SELECT user_password FROM users WHERE email = @Email');
