@@ -29,6 +29,7 @@ const pool = new Pool({
 app.get("/", (req, res) => {
     res.send("Server is working!");
 });
+
 // POST route to add a user
 app.post("/add-user", async (req, res) => {
     console.log("Request body received:", req.body); // Log the incoming request body
@@ -58,6 +59,61 @@ app.post("/add-user", async (req, res) => {
         console.error("Database error:", err.message);
         res.status(500).json({
             message: "An error occurred while adding the user.",
+            error: err.message,
+        });
+    }
+});
+
+// POST route for login
+app.post("/login", async (req, res) => {
+    console.log("Request body received:", req.body); // Log the incoming request body
+
+    // Destructure the required fields from the request body
+    const { email, password } = req.body;
+
+    // Validate the input
+    if (!email || !password) {
+        console.log("Validation failed: Missing fields");
+        return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    try {
+        // Create database connection pool
+        const pool = await sql.connect(dbConfig);
+
+        // Query to get the user details from the database
+        const result = await pool.request()
+            .input('Email', sql.VarChar, email)
+            .query('SELECT user_password FROM users WHERE email = @Email');
+
+        if (result.recordset.length === 0) {
+            // If no user found with the provided email
+            return res.status(400).json({
+                message: "Invalid email or password.",
+            });
+        }
+
+        // Get the stored password from the query result
+        const storedPassword = result.recordset[0].user_password;
+
+        // Compare the stored password with the provided password
+        if (storedPassword === password) {
+            // If the password matches
+            res.status(200).json({
+                message: "Login successful.",
+                user: { email }, // Optionally return user details here
+            });
+        } else {
+            // If the password doesn't match
+            res.status(400).json({
+                message: "Invalid email or password.",
+            });
+        }
+
+    } catch (err) {
+        console.error("Database error:", err.message);
+        res.status(500).json({
+            message: "An error occurred during login.",
             error: err.message,
         });
     }
