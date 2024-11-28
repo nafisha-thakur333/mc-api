@@ -8,7 +8,12 @@ require("dotenv").config();
 const app = express();
 
 // Enable CORS for all routes
-app.use(cors());
+app.use(cors({
+    origin: '*', // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
+app.options('*', cors()); // Enable preflight requests for all routes
+
 
 // Middleware to parse JSON requests
 app.use(express.json());
