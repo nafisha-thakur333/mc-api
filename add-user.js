@@ -66,9 +66,8 @@ app.post("/add-user", async (req, res) => {
 
 // POST route for login
 app.post("/login", async (req, res) => {
-    console.log("Request body received:", req.body); // Log the incoming request body
+    console.log("Request body received:", req.body); 
 
-    // Destructure the required fields from the request body
     const { email, password } = req.body;
 
     // Validate the input
@@ -78,11 +77,13 @@ app.post("/login", async (req, res) => {
     }
 
     try {
-        const result = await pool.request()
-            .input('Email', sql.VarChar, email)
-            .query('SELECT user_password FROM users WHERE email = @Email');
+        // Query to get the stored password for the given email
+        const result = await pool.query(
+            "SELECT user_password FROM users WHERE email = $1", 
+            [email]
+        );
 
-        if (result.recordset.length === 0) {
+        if (result.rows.length === 0) {
             // If no user found with the provided email
             return res.status(400).json({
                 message: "Invalid email or password.",
@@ -90,9 +91,9 @@ app.post("/login", async (req, res) => {
         }
 
         // Get the stored password from the query result
-        const storedPassword = result.recordset[0].user_password;
+        const storedPassword = result.rows[0].user_password;
 
-        // Compare the stored password with the provided password
+        // Compare the stored password with the provided password (assuming plaintext for now, should hash passwords in production)
         if (storedPassword === password) {
             // If the password matches
             res.status(200).json({
